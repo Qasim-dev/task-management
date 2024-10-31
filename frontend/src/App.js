@@ -1,19 +1,45 @@
-import React, { useState } from 'react';
-import TaskList from './components/TaskList';
-import TaskForm from './components/TaskForm';
-import FilterBar from './components/FilterBar';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import Login from './components/auth/Login';
+import Register from './components/auth/Register';
+import TaskListing from './pages/TaskListing';
+import ProtectedRoute from './protectedroute/ProtectedRoute';
+import CreateTask from './pages/CreateTask';
+import { useState } from 'react';
 
 const App = () => {
-  const [filters, setFilters] = useState({});
+
   const [taskToEdit, setTaskToEdit] = useState(null);
 
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+
   return (
-    <div className="App">
-      <h1>To-Do List</h1>
-      <FilterBar filters={filters} setFilters={setFilters} />
-      <TaskForm taskToEdit={taskToEdit} onTaskAdded={() => setTaskToEdit(null)} />
-      <TaskList filters={filters} onEdit={setTaskToEdit} />
-    </div>
+    <Routes>
+      <Route
+        path="/login"
+        element={isAuthenticated ? <Navigate to="/tasks" /> : <Login />}
+      />
+      <Route
+        path="/"
+        element={isAuthenticated ? <Navigate to="/tasks" /> : <Register />}
+      />
+      <Route
+        path="/tasks"
+        element={
+          <ProtectedRoute>
+            <TaskListing setTaskToEdit={setTaskToEdit} />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/createTask"
+        element={
+          <ProtectedRoute>
+            <CreateTask taskToEdit={taskToEdit} setTaskToEdit={setTaskToEdit}/>
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
   );
 };
 
